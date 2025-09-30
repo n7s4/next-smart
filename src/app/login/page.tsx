@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
-import { Space, Tabs, theme, App } from "antd";
+import { Space, Tabs, theme, App, Button } from "antd";
 import {
   AlipayCircleOutlined,
   LockOutlined,
@@ -22,6 +22,7 @@ import {
   setAlpha,
 } from "@ant-design/pro-components";
 type LoginType = "phone" | "account";
+import { createUser } from "@/lib/api/user";
 
 export default function Login() {
   const { status } = useSession();
@@ -40,49 +41,58 @@ export default function Login() {
 
   // 处理登录表单提交
   const handleLogin = async (values: any) => {
+    // setLoading(true);
+    // try {
+    //   if (loginType === "account") {
+    //     // 用户名密码登录
+    //     const result = await signIn("credentials", {
+    //       username: values.username,
+    //       password: values.password,
+    //       redirect: false,
+    //     });
+    //     console.log("result", result);
+    //     if (result?.error) {
+    //       message.error("用户名或密码错误");
+    //     } else if (result?.ok) {
+    //       message.success("登录成功");
+    //       // 登录成功后跳转到主页
+    //       router.push("/");
+    //     } else {
+    //       message.error("登录失败，请重试");
+    //     }
+    //   } else if (loginType === "phone") {
+    //     // 手机号验证码登录
+    //     const result = await signIn("phone", {
+    //       mobile: values.mobile,
+    //       captcha: values.captcha,
+    //       redirect: false,
+    //     });
+
+    //     if (result?.error) {
+    //       message.error("验证码错误或手机号不存在");
+    //     } else if (result?.ok) {
+    //       message.success("登录成功");
+    //       // 登录成功后跳转到主页
+    //       router.push("/");
+    //     } else {
+    //       message.error("登录失败，请重试");
+    //     }
+    //   }
+    // } catch (error) {
+    //   message.error("登录失败，请重试");
+    //   console.error("Login error:", error);
+    // } finally {
+    //   setLoading(false);
+    // }
+
     setLoading(true);
     try {
-      if (loginType === "account") {
-        // 用户名密码登录
-        const result = await signIn("credentials", {
-          username: values.username,
-          password: values.password,
-          redirect: false,
-        });
-        console.log("result", result);
-        if (result?.error) {
-          message.error("用户名或密码错误");
-        } else if (result?.ok) {
-          message.success("登录成功");
-          // 登录成功后跳转到主页
-          router.push("/");
-        } else {
-          message.error("登录失败，请重试");
-        }
-      } else if (loginType === "phone") {
-        // 手机号验证码登录
-        const result = await signIn("phone", {
-          mobile: values.mobile,
-          captcha: values.captcha,
-          redirect: false,
-        });
-
-        if (result?.error) {
-          message.error("验证码错误或手机号不存在");
-        } else if (result?.ok) {
-          message.success("登录成功");
-          // 登录成功后跳转到主页
-          router.push("/");
-        } else {
-          message.error("登录失败，请重试");
-        }
-      }
-    } catch (error) {
-      message.error("登录失败，请重试");
-      console.error("Login error:", error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) {}
+    fetch("/api/user", {
+      method: "GET",
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data));
   };
 
   const iconStyles: CSSProperties = {
@@ -91,6 +101,10 @@ export default function Login() {
     fontSize: "24px",
     verticalAlign: "middle",
     cursor: "pointer",
+  };
+  // test create
+  const create = () => {
+    createUser();
   };
   return (
     <ProConfigProvider hashed={false}>
@@ -266,6 +280,9 @@ export default function Login() {
             </a>
           </div>
         </LoginForm>
+      </div>
+      <div>
+        <Button onClick={create}>创建一个用户</Button>
       </div>
     </ProConfigProvider>
   );

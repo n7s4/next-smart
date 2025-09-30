@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 export interface User {
   _id?: ObjectId;
   id?: string; // 兼容 NextAuth
-  name: string;
+  username: string;
   email: string;
   password?: string; // 可选，因为 OAuth 用户可能没有密码
   image?: string | null;
