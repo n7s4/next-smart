@@ -16,7 +16,13 @@ export default function Login() {
     }
   }, [status, router]);
 
-  const onSubmit = () => {};
+  const onSubmit = () => {
+    console.log("onSubmit");
+    // 访问user接口、
+    fetch("/api/user", {
+      method: "GET",
+    }).then((res) => res.json()).then((data) => console.log(data));
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
