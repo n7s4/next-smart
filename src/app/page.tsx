@@ -6,7 +6,7 @@ export default function App() {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div>hello world</div>
-      <AuthButton />
+      {/* <AuthButton /> */}
       <div className="mt-4 flex flex-col gap-2">
         {/* load */}
         <Button>

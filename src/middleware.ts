@@ -10,6 +10,7 @@ export async function middleware(request: NextRequest) {
     req: request as any,
     secret: process.env.NEXTAUTH_SECRET,
   });
+  console.log("token", token);
   const isLoggedIn = !!token;
 
   // 公共路由：无需登录
@@ -26,17 +27,17 @@ export async function middleware(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(route + "/")
   );
 
-  // 未登录：拦截非公共路由 → /login
-  if (!isLoggedIn && !isPublic) {
-    const url = new URL("/login", request.url);
-    url.searchParams.set("from", pathname);
-    return NextResponse.redirect(url);
-  }
+  // // 未登录：拦截非公共路由 → /login
+  // if (!isLoggedIn && !isPublic) {
+  //   const url = new URL("/login", request.url);
+  //   url.searchParams.set("from", pathname);
+  //   return NextResponse.redirect(url);
+  // }
 
-  // 已登录：访问 /login → /home
-  if (isLoggedIn && (pathname === "/login" || pathname.startsWith("/login/"))) {
-    return NextResponse.redirect(new URL("/home", request.url));
-  }
+  // // 已登录：访问 /login → /home
+  // if (isLoggedIn && (pathname === "/login" || pathname.startsWith("/login/"))) {
+  //   return NextResponse.redirect(new URL("/home", request.url));
+  // }
 
   return NextResponse.next();
 }
