@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.19",
+    "@ant-design/icons": "5.x",
     "@ant-design/nextjs-registry": "^1.1.0",
     "@langchain/core": "^0.3.77",
     "@langchain/deepseek": "^0.1.0",

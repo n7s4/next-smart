@@ -4,6 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Form, Input } from "antd";
+import { GithubOutlined } from "@ant-design/icons";
 
 export default function Login() {
   const { status } = useSession();
@@ -36,14 +37,17 @@ export default function Login() {
             </Form>
           </div>
         </div>
-        <div className="flex justify-center">
-          <p className="mt-1 text-sm text-muted-foreground">第三方登录方式</p>
-          <Button
-            className="w-full"
-            onClick={() => signIn("github", { callbackUrl: "/home" })}
-          >
-            使用 GitHub 登录
-          </Button>
+        <div className="mt-6">
+          <p className="text-center text-sm text-muted-foreground mb-4">
+            第三方登录方式
+          </p>
+
+          <div className="flex justify-center">
+            <GithubOutlined
+              className="text-2xl cursor-pointer hover:text-primary transition-colors"
+              onClick={() => signIn("github", { callbackUrl: "/home" })}
+            />
+          </div>
         </div>
       </div>
     </div>
