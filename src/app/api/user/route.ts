@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { ApiResponse } from "@/lib/definitions";
+import bcrypt from "bcryptjs";
 
 // GET /api/user - 获取用户列表
 export async function GET(request: NextRequest) {
@@ -10,7 +11,11 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
 
     // 获取用户列表
-    const result = await prisma.user.findMany();
+    const result = await prisma.user.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
     return NextResponse.json<ApiResponse>({
       success: true,
       data: result,
@@ -33,6 +38,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { username, email, password } = body || {};
+
     if (!username || !email || !password) {
       return NextResponse.json<ApiResponse>(
         {
@@ -43,13 +49,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 检查 email 是否存在
-    const existingUser = await prisma.user.findMany({
-      where: {
-        email,
-      },
+    // 检查用户名是否已存在
+    const existingUserByUsername = await prisma.user.findUnique({
+      where: { username },
     });
-    if (existingUser) {
+    if (existingUserByUsername) {
+      return NextResponse.json<ApiResponse>(
+        {
+          success: false,
+          error: "用户名已被使用",
+        },
+        { status: 409 }
+      );
+    }
+
+    // 检查邮箱是否已存在
+    const existingUserByEmail = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (existingUserByEmail) {
       return NextResponse.json<ApiResponse>(
         {
           success: false,
@@ -59,16 +77,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 加密密码
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // 创建新用户
     const newUser = await prisma.user.create({
       data: {
         username,
         email,
-        password,
+        password: hashedPassword,
       },
     });
+
     // 移除密码字段
-    const { password: _, ...userWithoutPassword } = newUser;
+    const { password: _password, ...userWithoutPassword } = newUser;
+
     return NextResponse.json<ApiResponse>(
       {
         success: true,

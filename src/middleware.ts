@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
 
   // 读取 next-auth 的会话（需要设置 NEXTAUTH_SECRET）
   const token = await getToken({
-    req: request as any,
+    req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
   console.log("token", token);

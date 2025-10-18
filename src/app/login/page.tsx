@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
-import { Space, Tabs, theme, App, Button } from "antd";
+import { Space, Tabs, theme, App, Button, message } from "antd";
 import {
   AlipayCircleOutlined,
   LockOutlined,
@@ -21,13 +21,14 @@ import {
   ProFormText,
   setAlpha,
 } from "@ant-design/pro-components";
+import { loginUser, createUser } from "@/lib/api/user";
 type LoginType = "phone" | "account";
-import { createUser } from "@/lib/api/user";
 
 export default function Login() {
   const { status } = useSession();
   const router = useRouter();
-  const { message } = App.useApp();
+  const { message: message1 } = App.useApp();
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -38,61 +39,56 @@ export default function Login() {
   const { token } = theme.useToken();
   const [loginType, setLoginType] = useState<LoginType>("phone");
   const [loading, setLoading] = useState(false);
+  const [creatingUser, setCreatingUser] = useState(false);
 
   // 处理登录表单提交
   const handleLogin = async (values: any) => {
-    // setLoading(true);
-    // try {
-    //   if (loginType === "account") {
-    //     // 用户名密码登录
-    //     const result = await signIn("credentials", {
-    //       username: values.username,
-    //       password: values.password,
-    //       redirect: false,
-    //     });
-    //     console.log("result", result);
-    //     if (result?.error) {
-    //       message.error("用户名或密码错误");
-    //     } else if (result?.ok) {
-    //       message.success("登录成功");
-    //       // 登录成功后跳转到主页
-    //       router.push("/");
-    //     } else {
-    //       message.error("登录失败，请重试");
-    //     }
-    //   } else if (loginType === "phone") {
-    //     // 手机号验证码登录
-    //     const result = await signIn("phone", {
-    //       mobile: values.mobile,
-    //       captcha: values.captcha,
-    //       redirect: false,
-    //     });
-
-    //     if (result?.error) {
-    //       message.error("验证码错误或手机号不存在");
-    //     } else if (result?.ok) {
-    //       message.success("登录成功");
-    //       // 登录成功后跳转到主页
-    //       router.push("/");
-    //     } else {
-    //       message.error("登录失败，请重试");
-    //     }
-    //   }
-    // } catch (error) {
-    //   message.error("登录失败，请重试");
-    //   console.error("Login error:", error);
-    // } finally {
-    //   setLoading(false);
-    // }
-
     setLoading(true);
     try {
-    } catch (error) {}
-    fetch("/api/user", {
-      method: "GET",
-    })
-      .then((res) => res.json())
-      .then((data) => console.log(data));
+      const res = await loginUser(values);
+      if (res.status === 200 && res.data.success) {
+        messageApi.success("登录成功");
+        // 登录成功后跳转到首页
+        router.push("/");
+      } else {
+        const errorMsg = res.data?.error || "登录失败";
+        messageApi.error(errorMsg);
+      }
+    } catch (error: any) {
+      console.error("登录错误:", error);
+      const errorMsg =
+        error.response?.data?.error || "登录失败，请检查网络连接";
+      messageApi.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 创建测试用户
+  const handleCreateUser = async () => {
+    setCreatingUser(true);
+    try {
+      const testUser = {
+        username: `testuser_${Date.now()}`,
+        email: `test_${Date.now()}@example.com`,
+        password: "testpassword123",
+      };
+
+      const res = await createUser(testUser);
+      if (res.status === 201 && res.data.success) {
+        messageApi.success(
+          `用户创建成功！用户名: ${testUser.username}, 密码: ${testUser.password}`
+        );
+      } else {
+        messageApi.error("用户创建失败");
+      }
+    } catch (error: any) {
+      console.error("创建用户错误:", error);
+      const errorMsg = error.response?.data?.error || "创建用户失败";
+      messageApi.error(errorMsg);
+    } finally {
+      setCreatingUser(false);
+    }
   };
 
   const iconStyles: CSSProperties = {
@@ -102,16 +98,13 @@ export default function Login() {
     verticalAlign: "middle",
     cursor: "pointer",
   };
-  // test create
-  const create = () => {
-    createUser();
-  };
+
   return (
     <ProConfigProvider hashed={false}>
       <div
+        className="text-cente mt-[100px]"
         style={{
           backgroundColor: token.colorBgContainer,
-          minHeight: "100vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -132,18 +125,24 @@ export default function Login() {
             },
           }}
           actions={
-            <Space>
-              其他登录方式
-              <AlipayCircleOutlined style={iconStyles} />
-              <TaobaoCircleOutlined style={iconStyles} />
-              <WeiboCircleOutlined style={iconStyles} />
-              <GithubOutlined
-                style={iconStyles}
-                onClick={() => signIn("github", { callbackUrl: "/" })}
-              />
-            </Space>
+            <div className="flex flex-col gap-y-2">
+              <div>
+                其他登录方式
+                <AlipayCircleOutlined style={iconStyles} />
+                <TaobaoCircleOutlined style={iconStyles} />
+                <WeiboCircleOutlined style={iconStyles} />
+                <GithubOutlined
+                  style={iconStyles}
+                  onClick={() => signIn("github", { callbackUrl: "/" })}
+                />
+              </div>
+              <div>
+                还没有账号吗？<a>去注册</a>
+              </div>
+            </div>
           }
         >
+          <div className=" text-center mt-[100px] mb-[20px]">星途</div>
           <Tabs
             centered
             activeKey={loginType}
@@ -258,7 +257,10 @@ export default function Login() {
                   },
                 ]}
                 onGetCaptcha={async () => {
-                  message.success("获取验证码成功！验证码为：1234");
+                  // 模拟获取验证码
+                  setTimeout(() => {
+                    message1.success("获取验证码成功！验证码为：1234");
+                  }, 100);
                 }}
               />
             </>
@@ -281,8 +283,10 @@ export default function Login() {
           </div>
         </LoginForm>
       </div>
-      <div>
-        <Button onClick={create}>创建一个用户</Button>
+      <div style={{ marginTop: 16, textAlign: "center" }}>
+        <Button onClick={handleCreateUser} loading={creatingUser} type="dashed">
+          创建测试用户
+        </Button>
       </div>
     </ProConfigProvider>
   );

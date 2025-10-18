@@ -15,6 +15,7 @@ export interface User {
   lastLoginAt?: Date;
   isActive?: boolean;
   role?: "user" | "admin";
+  name: string;
 }
 
 // 聊天消息类型
