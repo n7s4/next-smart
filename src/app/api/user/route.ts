@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { ApiResponse } from "@/lib/definitions";
 import bcrypt from "bcryptjs";
+import { withAdminAuth } from "@/lib/auth-middleware";
 
-// GET /api/user - 获取用户列表
-export async function GET(request: NextRequest) {
+// GET /api/user - 获取用户列表（需要管理员权限）
+export const GET = withAdminAuth(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/user - 创建新用户
 export async function POST(request: NextRequest) {
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
     });
 
     // 移除密码字段
-    const { password: _password, ...userWithoutPassword } = newUser;
+    const { password: _, ...userWithoutPassword } = newUser;
 
     return NextResponse.json<ApiResponse>(
       {

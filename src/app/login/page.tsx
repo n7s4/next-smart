@@ -22,6 +22,7 @@ import {
   setAlpha,
 } from "@ant-design/pro-components";
 import { loginUser, createUser } from "@/lib/api/user";
+import { setTokenToLocalStorage } from "@/lib/utils";
 type LoginType = "phone" | "account";
 
 export default function Login() {
@@ -47,6 +48,8 @@ export default function Login() {
     try {
       const res = await loginUser(values);
       if (res.status === 200 && res.data.success) {
+        // 本地存储一下 token
+        setTokenToLocalStorage(res.data.data.token);
         messageApi.success("登录成功");
         // 登录成功后跳转到首页
         router.push("/");

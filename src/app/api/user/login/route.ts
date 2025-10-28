@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { ApiResponse } from "@/lib/definitions";
 import bcrypt from "bcryptjs";
+import { generateToken } from "@/lib/jwt";
 
 // POST /api/user/login - 用户登录
 export async function POST(request: NextRequest) {
@@ -66,13 +67,27 @@ export async function POST(request: NextRequest) {
       data: { last_login: new Date() },
     });
 
+    // 生成JWT token
+    const token = generateToken({
+      userId: user.id,
+      username: user.username,
+      email: user.email || undefined,
+      isActive: user.is_active,
+      isSuperuser: user.is_superuser,
+    });
+
     // 移除密码字段
-    const { password: _password, ...userWithoutPassword } = user;
+    const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json<ApiResponse>(
       {
         success: true,
-        data: userWithoutPassword,
+        data: {
+          user: userWithoutPassword,
+          token,
+          tokenType: "Bearer",
+          expiresIn: "7d", // 与JWT_EXPIRES_IN保持一致
+        },
         message: "登录成功",
       },
       { status: 200 }

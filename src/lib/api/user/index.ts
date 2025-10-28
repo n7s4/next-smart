@@ -21,7 +21,11 @@ export interface CreateUserParams {
  * 用户登录
  */
 export const loginUser = async (params: LoginParams) => {
-  const res = await axios.post(`${BASE_URL}/user/login`, params);
+  const res = await axios.post(`${BASE_URL}/user/login`, params, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
   return res;
 };
 
