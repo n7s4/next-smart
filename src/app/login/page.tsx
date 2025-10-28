@@ -21,7 +21,7 @@ import {
   ProFormText,
   setAlpha,
 } from "@ant-design/pro-components";
-import { loginUser, createUser } from "@/lib/api/user";
+import { loginUser, createUser, ResType } from "@/lib/api/user";
 import { setTokenToLocalStorage } from "@/lib/utils";
 type LoginType = "phone" | "account";
 
@@ -38,7 +38,7 @@ export default function Login() {
   }, [status, router]);
 
   const { token } = theme.useToken();
-  const [loginType, setLoginType] = useState<LoginType>("phone");
+  const [loginType, setLoginType] = useState<LoginType>("account");
   const [loading, setLoading] = useState(false);
   const [creatingUser, setCreatingUser] = useState(false);
 
@@ -47,9 +47,10 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await loginUser(values);
-      if (res.status === 200 && res.data.success) {
+      console.log("res", res);
+      if (res.success) {
         // 本地存储一下 token
-        setTokenToLocalStorage(res.data.data.token);
+        setTokenToLocalStorage(res.data!.token);
         messageApi.success("登录成功");
         // 登录成功后跳转到首页
         router.push("/");
@@ -78,7 +79,8 @@ export default function Login() {
       };
 
       const res = await createUser(testUser);
-      if (res.status === 201 && res.data.success) {
+      console.log("res", res);
+      if (res.success) {
         messageApi.success(
           `用户创建成功！用户名: ${testUser.username}, 密码: ${testUser.password}`
         );
@@ -140,20 +142,13 @@ export default function Login() {
                 />
               </div>
               <div>
-                还没有账号吗？<a>去注册</a>
+                还没有账号吗？
+                <a onClick={() => router.push("/register")}>去注册</a>
               </div>
             </div>
           }
         >
           <div className=" text-center mt-[100px] mb-[20px]">星途</div>
-          <Tabs
-            centered
-            activeKey={loginType}
-            onChange={(activeKey) => setLoginType(activeKey as LoginType)}
-          >
-            <Tabs.TabPane key={"account"} tab={"账号密码登录"} />
-            <Tabs.TabPane key={"phone"} tab={"手机号登录"} />
-          </Tabs>
           {loginType === "account" && (
             <>
               <ProFormText
@@ -214,57 +209,6 @@ export default function Login() {
                     message: "请输入密码！",
                   },
                 ]}
-              />
-            </>
-          )}
-          {loginType === "phone" && (
-            <>
-              <ProFormText
-                fieldProps={{
-                  size: "large",
-                  prefix: <MobileOutlined className={"prefixIcon"} />,
-                }}
-                name="mobile"
-                placeholder={"手机号"}
-                rules={[
-                  {
-                    required: true,
-                    message: "请输入手机号！",
-                  },
-                  {
-                    pattern: /^1\d{10}$/,
-                    message: "手机号格式错误！",
-                  },
-                ]}
-              />
-              <ProFormCaptcha
-                fieldProps={{
-                  size: "large",
-                  prefix: <LockOutlined className={"prefixIcon"} />,
-                }}
-                captchaProps={{
-                  size: "large",
-                }}
-                placeholder={"请输入验证码"}
-                captchaTextRender={(timing, count) => {
-                  if (timing) {
-                    return `${count} ${"获取验证码"}`;
-                  }
-                  return "获取验证码";
-                }}
-                name="captcha"
-                rules={[
-                  {
-                    required: true,
-                    message: "请输入验证码！",
-                  },
-                ]}
-                onGetCaptcha={async () => {
-                  // 模拟获取验证码
-                  setTimeout(() => {
-                    message1.success("获取验证码成功！验证码为：1234");
-                  }, 100);
-                }}
               />
             </>
           )}
