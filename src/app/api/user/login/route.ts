@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { ApiResponse } from "@/lib/definitions";
 import bcrypt from "bcryptjs";
 import { generateToken } from "@/lib/jwt";
+import { removeTokenFromLocalStorage } from "@/lib/utils";
 
 // POST /api/user/login - 用户登录
 export async function POST(request: NextRequest) {

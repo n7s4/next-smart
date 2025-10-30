@@ -5,6 +5,7 @@ import {
   AIMessage,
   SystemMessage,
 } from "@langchain/core/messages";
+import prisma from "@/lib/prisma";
 
 const model = new ChatDeepSeek({
   apiKey: process.env.DEEPSEEK_API_KEY,
@@ -37,12 +38,13 @@ const memory = new BufferMemory({
  *  */
 export const getChatResponseStream = async (
   userInput: string,
-  customSystemPrompt?: string
+  customSystemPrompt?: string,
+  conversationId?: string,
+  userId?: number
 ): Promise<ReadableStream> => {
   try {
     // 构造包含历史和当前输入的消息
     const { history } = await memory.loadMemoryVariables({});
-    console.log("Memory variables:", history);
 
     // 支持动态输入
     const symstemPrompt = customSystemPrompt || defaultSystemPrompt;
@@ -61,6 +63,17 @@ export const getChatResponseStream = async (
     return new ReadableStream({
       async start(controller) {
         try {
+          // 先保存用户消息
+          try {
+            await prisma.$executeRaw`INSERT INTO ChatMessage (conversationId, role, content, userId, createdAt) VALUES (${
+              conversationId || "default"
+            }, ${"user"}, ${userInput}, ${
+              userId ?? null
+            }, ${new Date().toISOString()})`;
+          } catch (e) {
+            console.error("Failed to persist user message:", e);
+          }
+
           for await (const chunk of stream) {
             const text = chunk.content as string;
             fullResponse += text;
@@ -72,6 +85,24 @@ export const getChatResponseStream = async (
             { input: userInput },
             { output: fullResponse }
           );
+          // 保存AI回复
+          try {
+            await prisma.$executeRaw`INSERT INTO ChatMessage (conversationId, role, content, userId, createdAt) VALUES (${
+              conversationId || "default"
+            }, ${"bot"}, ${fullResponse}, ${
+              userId ?? null
+            }, ${new Date().toISOString()})`;
+          } catch (e) {
+            console.error("Failed to persist bot message:", e);
+          }
+          // 如果该会话还没有标题，则用首条用户消息作为默认标题
+          try {
+            const cid = conversationId || "default";
+            const title = userInput.slice(0, 30);
+            await prisma.$executeRaw`INSERT OR IGNORE INTO Conversation (conversationId, title, pinned, createdAt, updatedAt) VALUES (${cid}, ${title}, ${0}, ${new Date().toISOString()}, ${new Date().toISOString()})`;
+          } catch (e) {
+            // 忽略
+          }
           controller.close();
         } catch (error) {
           console.error("Stream error:", error);

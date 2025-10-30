@@ -6,12 +6,12 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 读取 next-auth 的会话（需要设置 NEXTAUTH_SECRET）
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-  console.log("token", token);
-  const isLoggedIn = !!token;
+  // const token = await getToken({
+  //   req: request,
+  //   secret: process.env.NEXTAUTH_SECRET,
+  // });
+  // console.log("token*****", token);
+  // const isLoggedIn = !!token;
 
   // 公共路由：无需登录
   const publicRoutes = [

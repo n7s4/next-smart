@@ -24,7 +24,7 @@ export default function AuthButton() {
   return (
     <div>
       <p>Not signed in</p>
-      <button onClick={() => signIn("github")}>Sign in with GitHub</button>
+      <button>Sign in with GitHub</button>
     </div>
   );
 }

@@ -3,11 +3,10 @@ import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
-import { Space, Tabs, theme, App, Button, message } from "antd";
+import { theme, App, Button, message } from "antd";
 import {
   AlipayCircleOutlined,
   LockOutlined,
-  MobileOutlined,
   TaobaoCircleOutlined,
   UserOutlined,
   WeiboCircleOutlined,
@@ -16,12 +15,11 @@ import {
 import {
   LoginForm,
   ProConfigProvider,
-  ProFormCaptcha,
   ProFormCheckbox,
   ProFormText,
   setAlpha,
 } from "@ant-design/pro-components";
-import { loginUser, createUser, ResType } from "@/lib/api/user";
+import { createUser } from "@/lib/api/user";
 import { setTokenToLocalStorage } from "@/lib/utils";
 type LoginType = "phone" | "account";
 
@@ -42,27 +40,28 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [creatingUser, setCreatingUser] = useState(false);
 
-  // 处理登录表单提交
-  const handleLogin = async (values: any) => {
+  // 处理登录表单提交（走 NextAuth Credentials 流程）
+  const handleLogin = async (values: {
+    username: string;
+    password: string;
+  }) => {
     setLoading(true);
     try {
-      const res = await loginUser(values);
-      console.log("res", res);
-      if (res.success) {
-        // 本地存储一下 token
-        setTokenToLocalStorage(res.data!.token);
-        messageApi.success("登录成功");
-        // 登录成功后跳转到首页
-        router.push("/");
-      } else {
-        const errorMsg = res.data?.error || "登录失败";
-        messageApi.error(errorMsg);
+      const res = await signIn("credentials", {
+        username: values.username,
+        password: values.password,
+        redirect: false,
+        callbackUrl: "/",
+      });
+      if (res?.error) {
+        messageApi.error(res.error || "登录失败");
+        return;
       }
+      messageApi.success("登录成功");
+      router.replace("/");
     } catch (error: any) {
       console.error("登录错误:", error);
-      const errorMsg =
-        error.response?.data?.error || "登录失败，请检查网络连接";
-      messageApi.error(errorMsg);
+      messageApi.error("登录失败，请检查网络连接");
     } finally {
       setLoading(false);
     }
@@ -79,7 +78,6 @@ export default function Login() {
       };
 
       const res = await createUser(testUser);
-      console.log("res", res);
       if (res.success) {
         messageApi.success(
           `用户创建成功！用户名: ${testUser.username}, 密码: ${testUser.password}`
@@ -136,10 +134,7 @@ export default function Login() {
                 <AlipayCircleOutlined style={iconStyles} />
                 <TaobaoCircleOutlined style={iconStyles} />
                 <WeiboCircleOutlined style={iconStyles} />
-                <GithubOutlined
-                  style={iconStyles}
-                  onClick={() => signIn("github", { callbackUrl: "/" })}
-                />
+                <GithubOutlined style={iconStyles} />
               </div>
               <div>
                 还没有账号吗？

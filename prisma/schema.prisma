@@ -14,20 +14,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 //////     用户模型
 model User {
-  id       Int      @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   /// 用户名
-  username  String  @unique
-  alias     String?
-  email     String?   @unique
-  phone     String?  @unique
-  password  String
-  is_active Boolean  @default(true)
-  is_superuser Boolean @default(false)
-  last_login DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  username     String        @unique
+  alias        String?
+  email        String?       @unique
+  phone        String?       @unique
+  password     String
+  is_active    Boolean       @default(true)
+  is_superuser Boolean       @default(false)
+  last_login   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  // 关联：用户的聊天消息
+  chatMessages ChatMessage[]
+}
+
+//////     聊天消息模型（按会话ID分组存储）
+model ChatMessage {
+  id             Int      @id @default(autoincrement())
+  conversationId String // 会话ID，用于关联同一轮对话
+  role           String // 消息角色：user | bot | system
+  content        String // 消息内容
+  userId         Int? // 可选：关联用户
+  user           User?    @relation(fields: [userId], references: [id])
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+}
+
+//////     会话元信息（标题、置顶等）
+model Conversation {
+  conversationId String   @id        // 与 ChatMessage.conversationId 对应
+  title          String?
+  pinned         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

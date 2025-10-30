@@ -46,6 +46,20 @@ export const loginUser = async (
 };
 
 /**
+ * 退出登录
+ * @param params
+ * @returns
+ */
+export const logoutUser = async (): Promise<
+  ApiResponse<Record<string, unknown>>
+> => {
+  const res = await apiFetch.post<ApiResponse<Record<string, unknown>>>(
+    `${BASE_URL}/logout`
+  );
+  return res.data;
+};
+
+/**
  * 创建一个用户
  */
 export const createUser = async (
