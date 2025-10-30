@@ -1,61 +1,235 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Form, Input } from "antd";
-import { GithubOutlined } from "@ant-design/icons";
+import type { CSSProperties } from "react";
+import { theme, App, Button, message } from "antd";
+import {
+  AlipayCircleOutlined,
+  LockOutlined,
+  TaobaoCircleOutlined,
+  UserOutlined,
+  WeiboCircleOutlined,
+  GithubOutlined,
+} from "@ant-design/icons";
+import {
+  LoginForm,
+  ProConfigProvider,
+  ProFormCheckbox,
+  ProFormText,
+  setAlpha,
+} from "@ant-design/pro-components";
+import { createUser } from "@/lib/api/user";
+import { setTokenToLocalStorage } from "@/lib/utils";
+type LoginType = "phone" | "account";
 
 export default function Login() {
   const { status } = useSession();
   const router = useRouter();
+  const { message: message1 } = App.useApp();
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace("/home");
+      router.replace("/");
     }
   }, [status, router]);
 
-  const onSubmit = () => {
-    console.log("onSubmit");
-    // 访问user接口、
-    fetch("/api/user", {
-      method: "GET",
-    }).then((res) => res.json()).then((data) => console.log(data));
+  const { token } = theme.useToken();
+  const [loginType, setLoginType] = useState<LoginType>("account");
+  const [loading, setLoading] = useState(false);
+  const [creatingUser, setCreatingUser] = useState(false);
+
+  // 处理登录表单提交（走 NextAuth Credentials 流程）
+  const handleLogin = async (values: {
+    username: string;
+    password: string;
+  }) => {
+    setLoading(true);
+    try {
+      const res = await signIn("credentials", {
+        username: values.username,
+        password: values.password,
+        redirect: false,
+        callbackUrl: "/",
+      });
+      if (res?.error) {
+        messageApi.error(res.error || "登录失败");
+        return;
+      }
+      messageApi.success("登录成功");
+      router.replace("/");
+    } catch (error: any) {
+      console.error("登录错误:", error);
+      messageApi.error("登录失败，请检查网络连接");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 创建测试用户
+  const handleCreateUser = async () => {
+    setCreatingUser(true);
+    try {
+      const testUser = {
+        username: `testuser_${Date.now()}`,
+        email: `test_${Date.now()}@example.com`,
+        password: "testpassword123",
+      };
+
+      const res = await createUser(testUser);
+      if (res.success) {
+        messageApi.success(
+          `用户创建成功！用户名: ${testUser.username}, 密码: ${testUser.password}`
+        );
+      } else {
+        messageApi.error("用户创建失败");
+      }
+    } catch (error: any) {
+      console.error("创建用户错误:", error);
+      const errorMsg = error.response?.data?.error || "创建用户失败";
+      messageApi.error(errorMsg);
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
+  const iconStyles: CSSProperties = {
+    marginInlineStart: "16px",
+    color: setAlpha(token.colorTextBase, 0.2),
+    fontSize: "24px",
+    verticalAlign: "middle",
+    cursor: "pointer",
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-xl border bg-background p-6 shadow">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold">登录</h1>
-          <div className=" mt-2.5">
-            <Form onFinish={onSubmit}>
-              <Form.Item>
-                <Input placeholder="请输入用户名" />
-              </Form.Item>
-              <Form.Item>
-                <Input placeholder="请输入密码" />
-              </Form.Item>
-              <Form.Item>
-                <Button className="w-full">登录</Button>
-              </Form.Item>
-            </Form>
+    <ProConfigProvider hashed={false}>
+      <div
+        className="text-cente mt-[100px]"
+        style={{
+          backgroundColor: token.colorBgContainer,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <LoginForm
+          onFinish={handleLogin}
+          submitter={{
+            searchConfig: {
+              submitText: "登录",
+            },
+            submitButtonProps: {
+              loading: loading,
+              size: "large",
+              style: {
+                width: "100%",
+              },
+            },
+          }}
+          actions={
+            <div className="flex flex-col gap-y-2">
+              <div>
+                其他登录方式
+                <AlipayCircleOutlined style={iconStyles} />
+                <TaobaoCircleOutlined style={iconStyles} />
+                <WeiboCircleOutlined style={iconStyles} />
+                <GithubOutlined style={iconStyles} />
+              </div>
+              <div>
+                还没有账号吗？
+                <a onClick={() => router.push("/register")}>去注册</a>
+              </div>
+            </div>
+          }
+        >
+          <div className=" text-center mt-[100px] mb-[20px]">星途</div>
+          {loginType === "account" && (
+            <>
+              <ProFormText
+                name="username"
+                fieldProps={{
+                  size: "large",
+                  prefix: <UserOutlined className={"prefixIcon"} />,
+                }}
+                placeholder={"用户名: admin or user"}
+                rules={[
+                  {
+                    required: true,
+                    message: "请输入用户名!",
+                  },
+                ]}
+              />
+              <ProFormText.Password
+                name="password"
+                fieldProps={{
+                  size: "large",
+                  prefix: <LockOutlined className={"prefixIcon"} />,
+                  strengthText:
+                    "Password should contain numbers, letters and special characters, at least 8 characters long.",
+                  statusRender: (value) => {
+                    const getStatus = () => {
+                      if (value && value.length > 12) {
+                        return "ok";
+                      }
+                      if (value && value.length > 6) {
+                        return "pass";
+                      }
+                      return "poor";
+                    };
+                    const status = getStatus();
+                    if (status === "pass") {
+                      return (
+                        <div style={{ color: token.colorWarning }}>
+                          强度：中
+                        </div>
+                      );
+                    }
+                    if (status === "ok") {
+                      return (
+                        <div style={{ color: token.colorSuccess }}>
+                          强度：强
+                        </div>
+                      );
+                    }
+                    return (
+                      <div style={{ color: token.colorError }}>强度：弱</div>
+                    );
+                  },
+                }}
+                placeholder={"密码: ant.design"}
+                rules={[
+                  {
+                    required: true,
+                    message: "请输入密码！",
+                  },
+                ]}
+              />
+            </>
+          )}
+          <div
+            style={{
+              marginBlockEnd: 24,
+            }}
+          >
+            <ProFormCheckbox noStyle name="autoLogin">
+              自动登录
+            </ProFormCheckbox>
+            <a
+              style={{
+                float: "right",
+              }}
+            >
+              忘记密码
+            </a>
           </div>
-        </div>
-        <div className="mt-6">
-          <p className="text-center text-sm text-muted-foreground mb-4">
-            第三方登录方式
-          </p>
-
-          <div className="flex justify-center">
-            <GithubOutlined
-              className="text-2xl cursor-pointer hover:text-primary transition-colors"
-              onClick={() => signIn("github", { callbackUrl: "/home" })}
-            />
-          </div>
-        </div>
+        </LoginForm>
       </div>
-    </div>
+      <div style={{ marginTop: 16, textAlign: "center" }}>
+        <Button onClick={handleCreateUser} loading={creatingUser} type="dashed">
+          创建测试用户
+        </Button>
+      </div>
+    </ProConfigProvider>
   );
 }
