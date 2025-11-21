@@ -83,3 +83,18 @@ export const findUserById = async (
   );
   return res.data;
 };
+
+/**
+ * 彩标智能助手
+ * @param question
+ * @returns
+ */
+export const aiasassistant = async (
+  question: string
+): Promise<ApiResponse<string>> => {
+  const res = await apiFetch.post<ApiResponse<string>, { question: string }>(
+    `${BASE_URL}/aiassistant`,
+    { question }
+  );
+  return res.data;
+};

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Avatar } from "../ui/avatar";
 import GAvatar from "../gavatar";
+import AIAssistant from "../AIAssistant";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -13,6 +14,7 @@ const defaultNavItems: MenuItem[] = [
   { label: "首页", key: "/" },
   { label: "AI 盒子", key: "/chat" },
   { label: "加载示例", key: "/load" },
+  { label: "博客", key: "/blog" },
 ];
 
 export default function Layout({
@@ -42,7 +44,7 @@ export default function Layout({
                 onClick={onClick}
                 mode="horizontal"
                 items={navItems}
-                className="border-none"
+                className=" border-none bg-transparent"
               />
             </nav>
             <div className="text-base font-medium">
@@ -57,7 +59,9 @@ export default function Layout({
           </div>
         </div>
       </div>
-
+      <div className="fixed top-[40%] -right-[20px] z-50 transition-transform duration-300 hover:-translate-x-[30px]">
+        <AIAssistant />
+      </div>
       <div className="flex-1 pt-14">
         <div className="mx-auto w-full max-w-7xl px-4 py-6">{children}</div>
       </div>
