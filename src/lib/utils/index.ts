@@ -10,14 +10,14 @@ interface CreateLLMOptions {
   temperature: number;
   [key: string]: any;
 }
-interface ToolsOptions {
-  tools: any[];
+interface LLMToolsOptions {
+  tools?: any[];
 }
 export const createLLM = (
   options?: CreateLLMOptions,
-  toolsOptions?: ToolsOptions
+  toolsOptions?: LLMToolsOptions
 ) => {
-  const { model = "deepseek-chat", temperature = 0.7, ...rest } = options || {};
+  const { model = "deepseek-chat", temperature = 0.7 } = options || {};
   const llm = new ChatDeepSeek({
     model,
     temperature,
@@ -66,14 +66,14 @@ interface CreateLLMWithToolsOptions {
 export const createLLMWithTools = (options: CreateLLMWithToolsOptions) => {
   const { llmConfig, toolsConfig } = options;
 
-  // 先创建 llm
+  // 先创建工具
   const tools = createTools(toolsConfig);
+  if (tools.length > 0) {
+    console.log("Tool name:", tools[0].name);
+  }
 
   // 创建 llm 并绑定 tools
-  const llm = createLLM({
-    ...llmConfig,
-    tools,
-  });
+  const llm = createLLM(llmConfig, { tools });
 
   // 创建 toolNode
   const toolNode = createToolNode(tools);

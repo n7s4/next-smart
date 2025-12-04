@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import type { FormItemProps, FormProps } from "antd";
 import { Button, Form, Input, message } from "antd";
 import { useRouter } from "next/navigation";
-import "@ant-design/v5-patch-for-react-19";
 import { createUser } from "@/lib/api/user";
 
 const formItemLayout: FormProps = {

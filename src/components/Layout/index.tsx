@@ -1,8 +1,8 @@
 "use client";
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import { Menu } from "antd";
 import type { MenuProps } from "antd";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Avatar } from "../ui/avatar";
 import GAvatar from "../gavatar";
@@ -15,6 +15,8 @@ const defaultNavItems: MenuItem[] = [
   { label: "AI 盒子", key: "/chat" },
   { label: "加载示例", key: "/load" },
   { label: "博客", key: "/blog" },
+  { label: "星羽天气", key: "/weather" },
+  { label: "星羽楼", key: "/foods" },
 ];
 
 export default function Layout({
@@ -27,11 +29,22 @@ export default function Layout({
   footerText?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session } = useSession();
 
-  const onClick: MenuProps["onClick"] = (e) => {
-    if (e.key) router.push(String(e.key));
-  };
+  const onClick: MenuProps["onClick"] = useCallback(
+    (e) => {
+      if (e.key && e.key !== pathname) {
+        router.push(String(e.key));
+      }
+    },
+    [router, pathname]
+  );
+
+  const username = useMemo(
+    () => session?.user?.name || session?.user?.email || "未登录",
+    [session?.user?.name, session?.user?.email]
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -44,16 +57,13 @@ export default function Layout({
                 onClick={onClick}
                 mode="horizontal"
                 items={navItems}
+                selectedKeys={[pathname]}
                 className=" border-none bg-transparent"
               />
             </nav>
             <div className="text-base font-medium">
               <div>
-                <GAvatar
-                  username={
-                    session?.user?.name || session?.user?.email || "未登录"
-                  }
-                />
+                <GAvatar username={username} />
               </div>
             </div>
           </div>

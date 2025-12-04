@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+// 必须在 antd 组件使用之前导入 React 19 兼容补丁
+import "@ant-design/v5-patch-for-react-19";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import Providers from "@/app/providers";
-import Layout from "@/components/Layout";
+import ConditionalLayout from "@/components/ConditionalLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +34,7 @@ export default function RootLayout({
       >
         <Providers>
           <AntdRegistry>
-            <Layout>{children}</Layout>
+            <ConditionalLayout>{children}</ConditionalLayout>
           </AntdRegistry>
         </Providers>
       </body>

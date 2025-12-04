@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useCallback, memo } from "react";
 import { Avatar } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
@@ -19,25 +19,27 @@ const items: MenuProps["items"] = [
   { label: "退出登录", key: "logout" },
 ];
 
-const GAvatar: FC<GAvatarProps> = (props: GAvatarProps) => {
+const GAvatar: FC<GAvatarProps> = memo((props: GAvatarProps) => {
   const { src, username } = props;
   const router = useRouter();
 
   // 点击下拉菜单
-  const handleMenuClick: MenuProps["onClick"] = async (e) => {
-    if (e.key === "logout") {
-      // 退出登录
-      const res = await logoutUser();
-      if (res.success) {
-        await signOut();
-
-        // 清除客户端存储的token
-        removeTokenFromLocalStorage();
-        // 跳转到登录页
-        router.push("/login");
+  const handleMenuClick: MenuProps["onClick"] = useCallback(
+    async (e) => {
+      if (e.key === "logout") {
+        // 退出登录
+        const res = await logoutUser();
+        if (res.success) {
+          // 清除客户端存储的token
+          removeTokenFromLocalStorage();
+          await signOut({
+            callbackUrl: "/login",
+          });
+        }
       }
-    }
-  };
+    },
+    [router]
+  );
 
   return (
     <div className="flex items-center">
@@ -56,5 +58,8 @@ const GAvatar: FC<GAvatarProps> = (props: GAvatarProps) => {
       </Dropdown>
     </div>
   );
-};
+});
+
+GAvatar.displayName = "GAvatar";
+
 export default GAvatar;

@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, memo, useCallback } from "react";
 import { Affix, Avatar, Button } from "antd";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import avatar from "@/assets/images/cat.jpg";
@@ -7,13 +7,12 @@ import { ChatMessage } from "./Message/index";
 
 interface AIAssistantProps {}
 
-const AIAssistant: FC<AIAssistantProps> = ({}) => {
+const AIAssistant: FC<AIAssistantProps> = memo(() => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-    console.log(isExpanded);
-  };
+  const handleToggle = useCallback(() => {
+    setIsExpanded((prev) => !prev);
+  }, []);
   const messages: ChatMessage = {
     message: [
       {
@@ -78,6 +77,8 @@ const AIAssistant: FC<AIAssistantProps> = ({}) => {
       )}
     </div>
   );
-};
+});
+
+AIAssistant.displayName = "AIAssistant";
 
 export default AIAssistant;
