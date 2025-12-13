@@ -12,7 +12,7 @@ type MenuItem = Required<MenuProps>["items"][number];
 
 const defaultNavItems: MenuItem[] = [
   { label: "首页", key: "/" },
-  { label: "AI 盒子", key: "/chat" },
+  { label: "羽说", key: "/gptchat" },
   { label: "加载示例", key: "/load" },
   { label: "博客", key: "/blog" },
   { label: "星羽天气", key: "/weather" },
@@ -47,7 +47,7 @@ export default function Layout({
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
       <div className="fixed top-0 inset-x-0 z-50 border-b border-border bg-card">
         <div className="mx-auto w-full max-w-7xl px-4">
           <div className="h-14 flex items-center justify-between">
@@ -69,20 +69,20 @@ export default function Layout({
           </div>
         </div>
       </div>
-      <div className="fixed top-[40%] -right-[20px] z-50 transition-transform duration-300 hover:-translate-x-[30px]">
+      {/* <div className="fixed top-[40%] -right-[20px] z-50 transition-transform duration-300 hover:-translate-x-[30px]">
         <AIAssistant />
-      </div>
-      <div className="flex-1 pt-14">
-        <div className="mx-auto w-full max-w-7xl px-4 py-6">{children}</div>
+      </div> */}
+      <div className="flex-1 mt-10">
+        <div className="mx-auto w-full px-4 py-6">{children}</div>
       </div>
 
-      <div className="border-t border-border bg-card">
+      {/* <div className="border-t border-border bg-card">
         <div className="mx-auto w-full max-w-7xl px-4">
           <div className="h-12 flex items-center text-sm text-muted-foreground">
             {footerText}
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { ChatDeepSeek } from "@langchain/deepseek";
-import { BufferMemory } from "langchain/memory";
+import { BufferMemory } from "@langchain/classic/memory";
 import {
   HumanMessage,
   AIMessage,
