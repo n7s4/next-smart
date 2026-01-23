@@ -21,6 +21,7 @@ export const createLLM = (
   const llm = new ChatDeepSeek({
     model,
     temperature,
+    streaming: true,
   });
   if (toolsOptions?.tools && toolsOptions.tools.length > 0) {
     return llm.bindTools(toolsOptions.tools);

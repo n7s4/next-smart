@@ -63,16 +63,14 @@ export const getChatResponseStream = async (
     return new ReadableStream({
       async start(controller) {
         try {
-          // 先保存用户消息
-          try {
-            await prisma.$executeRaw`INSERT INTO ChatMessage (conversationId, role, content, userId, createdAt) VALUES (${
-              conversationId || "default"
-            }, ${"user"}, ${userInput}, ${
-              userId ?? null
-            }, ${new Date().toISOString()})`;
-          } catch (e) {
+          // 异步保存用户消息，不阻塞流式输出
+          prisma.$executeRaw`INSERT INTO ChatMessage (conversationId, role, content, userId, createdAt) VALUES (${
+            conversationId || "default"
+          }, ${"user"}, ${userInput}, ${
+            userId ?? null
+          }, ${new Date().toISOString()})`.catch((e) => {
             console.error("Failed to persist user message:", e);
-          }
+          });
 
           for await (const chunk of stream) {
             const text = chunk.content as string;
