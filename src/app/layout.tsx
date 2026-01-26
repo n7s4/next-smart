@@ -6,6 +6,7 @@ import "@ant-design/v5-patch-for-react-19";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import Providers from "@/app/providers";
 import ConditionalLayout from "@/components/ConditionalLayout";
+import localFont from "next/font/local";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -12,9 +12,9 @@ import {
   EditOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  SearchOutlined,
 } from "@ant-design/icons";
 import userAvatar from "@/assets/images/cat.jpg";
+import xy from "@/assets/images/xy.png";
 
 const { Sider, Content } = Layout;
 
@@ -346,7 +346,15 @@ const GptChat: FC = () => {
           {!hasConversation ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-6 pl-0 pr-4 text-center w-full">
               <div className="p-4 bg-muted rounded-full">
-                <Bot className="w-12 h-12 text-foreground" />
+                {/* <Bot className="w-12 h-12 text-foreground" /> */}
+                <Bot color="#2abfe5" className="w-12 h-12 text-foreground" />
+                {/* <img
+                  src={xy.src}
+                  alt="user avatar"
+                  width={48}
+                  height={48}
+                  className="text-cyan-600 dark:text-cyan-400"
+                /> */}
               </div>
               <div className="space-y-2 max-w-xl">
                 <h2 className="text-2xl font-semibold text-foreground">
@@ -373,12 +381,12 @@ const GptChat: FC = () => {
                       onClick={handleSendMessage}
                       disabled={!userMessage.trim() || isLoading}
                       size="lg"
-                      className="h-[44px] w-[44px] rounded-xl bg-[#10a37f] hover:bg-[#0d8f6e] text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-[44px] w-[44px] rounded-xl text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
-                        <Send className="w-5 h-5" />
+                        <Send className="w-5 h-5 from-cyan-600! to-violet-600!" />
                       )}
                     </Button>
                   </div>
@@ -507,12 +515,12 @@ const GptChat: FC = () => {
                         onClick={handleSendMessage}
                         disabled={!userMessage.trim() || isLoading}
                         size="lg"
-                        className="h-[44px] w-[44px] rounded-xl bg-[#10a37f] hover:bg-[#0d8f6e] text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-[44px] w-[44px] rounded-xl text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isLoading ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
-                          <Send className="w-5 h-5" />
+                          <Send color="#2abfe5" />
                         )}
                       </Button>
                     </div>
