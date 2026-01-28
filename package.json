@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "kb:init": "tsx scripts/init-knowledge-base.ts",
+    "kb:test": "tsx src/lib/rag/test-knowledge-base.ts",
+    "kb:check": "tsx scripts/check-knowledge-bases.ts"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.19",

@@ -56,7 +56,7 @@
   --card-foreground: oklch(0.18 0.02 260);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.02 260);
-  --primary: oklch(0.55 0.18 195);
+  --primary: #2abfe5;
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.96 0.01 264);
   --secondary-foreground: oklch(0.25 0.03 260);
@@ -187,12 +187,14 @@
     0 8px 48px -8px oklch(0.35 0.12 195 / 0.08);
 }
 
-/* 隐藏滚动条但保持滚动功能 */
-.hide-scrollbar {
-  -ms-overflow-style: none; /* IE 和 Edge */
-  scrollbar-width: none; /* Firefox */
-}
+html,
+body {
+  /* 核心：启用滚动（防止全局禁用） */
+  overflow-x: hidden; /* 可选：禁止水平滚动，根据需求调整 */
+  overflow-y: auto;
 
-.hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari 和 Opera */
+  /* Firefox 浏览器 */
+  scrollbar-width: none;
+  /* IE/Edge 浏览器 */
+  -ms-overflow-style: none;
 }

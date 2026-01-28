@@ -13,6 +13,7 @@ type MenuItem = Required<MenuProps>["items"][number];
 const defaultNavItems: MenuItem[] = [
   { label: "首页", key: "/" },
   { label: "羽说", key: "/gptchat" },
+  { label: "星盒", key: "/startbox" },
   { label: "加载示例", key: "/load" },
   { label: "博客", key: "/blog" },
   { label: "星羽天气", key: "/weather" },
@@ -75,22 +76,9 @@ export default function Layout({
           </div>
         </div>
       </header>
-      {/* <div className="fixed top-[40%] -right-[20px] z-50 transition-transform duration-300 hover:-translate-x-[30px]">
-        <AIAssistant />
-      </div> */}
-      <main className="flex-1 pt-16 sm:pt-20 w-full">
-        <div className="w-full min-h-[calc(100vh-4rem)] pt-6 sm:pt-8 px-0">
-          {children}
-        </div>
+      <main className="flex-1 w-full">
+        <div className="w-full  pt-6 sm:pt-16 px-0">{children}</div>
       </main>
-
-      {/* <div className="border-t border-border bg-card">
-        <div className="mx-auto w-full max-w-7xl px-4">
-          <div className="h-12 flex items-center text-sm text-muted-foreground">
-            {footerText}
-          </div>
-        </div>
-      </div> */}
     </div>
   );
 }

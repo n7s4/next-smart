@@ -47,3 +47,11 @@ prisma/migrations
 
 # generated
 src/generated
+
+# uploads
+/uploads
+*.log
+
+# uploads
+uploads/
+/uploads
