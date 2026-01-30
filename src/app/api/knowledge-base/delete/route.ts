@@ -12,11 +12,11 @@ export async function DELETE(request: NextRequest) {
     const knowledgeBaseId = searchParams.get("id");
 
     if (!knowledgeBaseId) {
-      return NextResponse.json(
-        { error: "缺少参数：id" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "缺少参数：id" }, { status: 400 });
     }
+
+    // 确保管理器已初始化
+    await knowledgeBaseManager.ensureInitialized();
 
     await knowledgeBaseManager.deleteKnowledgeBase(knowledgeBaseId);
 

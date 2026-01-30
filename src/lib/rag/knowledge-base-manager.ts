@@ -41,6 +41,10 @@ class KnowledgeBaseManager {
   // 文件上传目录
   private uploadDir: string;
 
+  // 初始化状态
+  private isInitialized: boolean = false;
+  private initPromise: Promise<void> | null = null;
+
   private constructor() {
     this.embeddings = new AlibabaTongyiEmbeddings({});
     this.textSplitter = new RecursiveCharacterTextSplitter({
@@ -56,6 +60,37 @@ class KnowledgeBaseManager {
       KnowledgeBaseManager.instance = new KnowledgeBaseManager();
     }
     return KnowledgeBaseManager.instance;
+  }
+
+  /**
+   * 初始化管理器（异步加载配置）
+   */
+  async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
+    // 如果正在初始化，等待完成
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    // 开始初始化
+    this.initPromise = this.loadAllConfigs().then(() => {
+      this.isInitialized = true;
+      console.log("✅ 知识库管理器初始化完成");
+    });
+
+    return this.initPromise;
+  }
+
+  /**
+   * 确保已初始化
+   */
+  async ensureInitialized(): Promise<void> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
   }
 
   /**
@@ -168,14 +203,16 @@ class KnowledgeBaseManager {
   /**
    * 获取知识库的向量存储
    */
-  getVectorStore(kbId: string): MemoryVectorStore | undefined {
+  async getVectorStore(kbId: string): Promise<MemoryVectorStore | undefined> {
+    await this.ensureInitialized();
     return this.vectorStores.get(kbId);
   }
 
   /**
    * 获取知识库配置
    */
-  getConfig(kbId: string): KnowledgeBaseConfig | undefined {
+  async getConfig(kbId: string): Promise<KnowledgeBaseConfig | undefined> {
+    await this.ensureInitialized();
     return this.configs.get(kbId);
   }
 
@@ -183,6 +220,7 @@ class KnowledgeBaseManager {
    * 向现有知识库添加文档
    */
   async addDocuments(kbId: string, files: File[] | string[]): Promise<void> {
+    await this.ensureInitialized();
     const config = this.configs.get(kbId);
     if (!config) {
       throw new Error(`知识库不存在: ${kbId}`);
@@ -231,6 +269,7 @@ class KnowledgeBaseManager {
    * 删除知识库
    */
   async deleteKnowledgeBase(kbId: string): Promise<void> {
+    await this.ensureInitialized();
     // 删除向量存储
     this.vectorStores.delete(kbId);
 
@@ -259,7 +298,8 @@ class KnowledgeBaseManager {
   /**
    * 获取所有知识库列表
    */
-  getAllKnowledgeBases(): KnowledgeBaseConfig[] {
+  async getAllKnowledgeBases(): Promise<KnowledgeBaseConfig[]> {
+    await this.ensureInitialized();
     return Array.from(this.configs.values());
   }
 
@@ -271,6 +311,7 @@ class KnowledgeBaseManager {
     query: string,
     k: number = 4
   ): Promise<Document[]> {
+    await this.ensureInitialized();
     const vectorStore = this.vectorStores.get(kbId);
     if (!vectorStore) {
       throw new Error(`知识库不存在: ${kbId}`);
@@ -384,6 +425,8 @@ class KnowledgeBaseManager {
    * 确保知识库已加载向量存储（懒加载）
    */
   async ensureVectorStoreLoaded(kbId: string): Promise<void> {
+    await this.ensureInitialized();
+
     // 如果已经加载，直接返回
     if (this.vectorStores.has(kbId)) {
       return;

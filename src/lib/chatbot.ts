@@ -100,6 +100,7 @@ export const getChatResponseStream = async (
             await prisma.$executeRaw`INSERT OR IGNORE INTO Conversation (conversationId, title, pinned, createdAt, updatedAt) VALUES (${cid}, ${title}, ${0}, ${new Date().toISOString()}, ${new Date().toISOString()})`;
           } catch (e) {
             // 忽略
+            throw e;
           }
           controller.close();
         } catch (error) {

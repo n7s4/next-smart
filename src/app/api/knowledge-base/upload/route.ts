@@ -48,6 +48,9 @@ export async function POST(request: NextRequest) {
       savedFiles.push(filePath);
     }
 
+    // 确保管理器已初始化
+    await knowledgeBaseManager.ensureInitialized();
+
     // 创建知识库并向量化文档
     await knowledgeBaseManager.createKnowledgeBase(
       knowledgeBaseId,

@@ -3,17 +3,55 @@
 ## 🎯 一键修复
 
 ```bash
-# 1. 检查知识库
+# 1. 安装依赖（如果刚更新代码）
+pnpm install
+
+# 2. 检查知识库
 pnpm kb:check
 
-# 2. 重启服务器（Ctrl+C 停止，然后重新启动）
+# 3. 停止并重启服务器
+# 按 Ctrl+C 停止当前服务器
+# 然后重新启动:
 pnpm dev
 
-# 3. 刷新页面
+# 4. 刷新浏览器页面
 # 访问 http://localhost:3000/startbox
 ```
 
 就这么简单！✨
+
+## 🔧 如果还是不行？
+
+### 方法 1: 清除 Next.js 缓存
+
+```bash
+# Windows PowerShell
+Remove-Item -Recurse -Force .next
+pnpm dev
+
+# Mac/Linux
+rm -rf .next
+pnpm dev
+```
+
+### 方法 2: 手动测试 API
+
+```bash
+# 测试 list 接口
+curl http://localhost:3000/api/knowledge-base/list
+```
+
+应该返回你的知识库列表。
+
+### 方法 3: 查看服务器日志
+
+重启后应该看到：
+
+```
+📂 已加载知识库: 诗词 (1 个文件)
+✅ 共加载 1 个知识库（向量存储将按需加载）
+✅ 知识库管理器初始化完成
+```
 
 ## 🔍 发生了什么？
 

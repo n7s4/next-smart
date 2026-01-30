@@ -8,7 +8,14 @@ import { knowledgeBaseManager } from "@/lib/rag/knowledge-base-manager";
 
 export async function GET() {
   try {
-    const knowledgeBases = knowledgeBaseManager.getAllKnowledgeBases();
+    // 确保管理器已初始化
+    await knowledgeBaseManager.ensureInitialized();
+
+    // 获取所有知识库
+    const knowledgeBases = await knowledgeBaseManager.getAllKnowledgeBases();
+
+    console.log("📋 获取知识库列表:", knowledgeBases.length, "个");
+
     return NextResponse.json({
       status: 1,
       message: "获取成功",
